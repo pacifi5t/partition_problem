@@ -1,51 +1,49 @@
-use binary_vec::BinaryVec;
-use std::ops::Sub;
+use hill_climb::*;
+use std::error::Error;
+use std::fs::File;
+use std::io::Read;
 
 mod binary_vec;
+mod hill_climb;
 
-fn target_fn(bvec: &BinaryVec, values: &Vec<f64>) -> f64 {
-    let iter = bvec.data.iter().enumerate();
-    let sum1 = iter
-        .map(|(i, elem)| match elem {
-            true => values.get(i).unwrap().clone(),
-            false => 0.0,
-        })
-        .sum::<f64>();
+fn parse_file() -> Result<Vec<f64>, Box<dyn Error>> {
+    let mut file = File::open("data/jewels.txt")?;
+    let mut buffer = String::new();
+    file.read_to_string(&mut buffer)?;
 
-    let sum2 = values.iter().sum::<f64>() / 2.0;
+    let mut costs = Vec::<f64>::new();
+    for each in buffer.split('\n').filter(|s| !s.is_empty()) {
+        costs.push(each.parse()?);
+    }
 
-    sum1.sub(sum2).abs()
+    Ok(costs)
 }
 
-fn hill_climb_min(values: &Vec<f64>) -> BinaryVec {
-    let mut x = BinaryVec::random(values.len());
-    let mut found = true;
+fn benchmark(costs: &Vec<f64>, runs: usize) {
+    let mut results =  Vec::new();
 
-    while found {
-        let mut min = f64::MAX;
-        let mut y = x.clone();
+    for i in 1..=runs {
+        let res = hill_climb_min(costs);
+        let target_fn_val = target_fn(&res, costs);
+        results.push(target_fn_val);
 
-        for each in x.one_flip() {
-            let temp = target_fn(&each, &values);
-            if temp < min {
-                min = temp;
-                y = each;
-            }
-        }
+        println!("Run {}: {}", i, target_fn_val);
+    }
 
-        if target_fn(&y, &values) < target_fn(&x, &values) {
-            x = y;
-        } else {
-            found = false;
+    let mut min = f64::MAX;
+    for each in results {
+        if each < min {
+            min = each;
         }
     }
 
-    x
+    println!("\nBest: {}", min);
 }
 
-fn main() {
-    let costs = vec![1.2, 4.1, 3.4, 2.0];
-    let res = hill_climb_min(&costs);
-    println!("{:?}", res.data);
-    println!("{}", target_fn(&res, &costs))
+fn main() -> Result<(), Box<dyn Error>> {
+    let costs = parse_file()?;
+
+    benchmark(&costs, 10);
+
+    Ok(())
 }
