@@ -1,9 +1,11 @@
 [package]
-name = "subset_sum"
+name = "partition_problem"
 version = "0.1.0"
 edition = "2021"
 
-default-run = "subset_sum"
+default-run = "partition_problem"
 
 [dependencies]
 rand = "0.8.5"
+chrono = "0.4.23"
+plotters = "0.3.4"
