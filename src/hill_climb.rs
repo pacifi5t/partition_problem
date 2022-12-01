@@ -1,18 +1,16 @@
-use std::ops::Sub;
 use crate::binary_vec::BinaryVec;
 
 pub fn target_fn(bvec: &BinaryVec, values: &Vec<f64>) -> f64 {
-    let iter = bvec.data.iter().enumerate();
-    let sum1 = iter
-        .map(|(i, elem)| match elem {
-            true => values.get(i).unwrap().clone(),
-            false => 0.0,
-        })
+    let nums = bvec.as_nums();
+    let sum1 = nums
+        .iter()
+        .enumerate()
+        .map(|(i, e)| values.get(i).unwrap().clone() * *e as f64)
         .sum::<f64>();
 
     let sum2 = values.iter().sum::<f64>() / 2.0;
 
-    sum1.sub(sum2).abs()
+    (sum1 - sum2).abs()
 }
 
 pub fn hill_climb_min(values: &Vec<f64>) -> BinaryVec {

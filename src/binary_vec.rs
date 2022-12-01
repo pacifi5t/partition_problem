@@ -2,30 +2,48 @@ use rand::random;
 
 #[derive(Clone)]
 pub struct BinaryVec {
-    pub data: Box<Vec<bool>>,
+    bits: Box<Vec<bool>>,
 }
 
 impl BinaryVec {
-    pub fn random(len: usize) -> BinaryVec {
-        let mut data = Box::new(Vec::<bool>::new());
+    pub fn random(len: usize) -> Self {
+        let mut bits = Box::new(Vec::<bool>::new());
 
         for _ in 0..len {
-            data.push(random());
+            bits.push(random());
         }
 
-        BinaryVec { data }
+        Self { bits }
+    }
+
+    pub fn ones(len: usize) -> Self {
+        Self {
+            bits: Box::new(vec![true; len]),
+        }
     }
 
     pub fn one_flip(&self) -> Vec<BinaryVec> {
         let mut flips = Vec::new();
 
-        for i in 0..self.data.len() {
+        for i in 0..self.bits.len() {
             let mut copy = self.clone();
-            let elem = copy.data.get_mut(i).unwrap();
+            let elem = copy.bits.get_mut(i).unwrap();
             *elem = !*elem;
             flips.push(copy);
         }
 
         flips
+    }
+
+    pub fn as_nums(&self) -> Vec<u8> {
+        let mut nums = Vec::new();
+        for each in self.bits.iter() {
+            nums.push(match each {
+                true => 1,
+                false => 0,
+            })
+        }
+
+        nums
     }
 }
