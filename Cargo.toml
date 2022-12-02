@@ -7,5 +7,10 @@ default-run = "partition_problem"
 
 [dependencies]
 rand = "0.8.5"
+ndarray = "0.15.6"
+int_data_analysis = { git = "https://gitlab.com/pacifi5t/int_data_analysis" }
+
+[dev-dependencies]
 chrono = "0.4.23"
+csv = "1.1.6"
 plotters = "0.3.4"
