@@ -457,7 +457,7 @@ dependencies = [
 [[package]]
 name = "int_data_analysis"
 version = "0.1.0"
-source = "git+https://gitlab.com/pacifi5t/int_data_analysis#edb8bbd38cb6147fc85534b8d3b952316fac46b3"
+source = "git+https://gitlab.com/pacifi5t/int_data_analysis#7d4f599cf252b23d00f4aa5413f7bc5b658c76b8"
 dependencies = [
  "approx 0.5.1",
  "linfa-datasets",
