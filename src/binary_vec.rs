@@ -2,12 +2,12 @@ use rand::random;
 
 #[derive(Clone)]
 pub struct BinaryVec {
-    bits: Box<Vec<bool>>,
+    bits: Vec<bool>,
 }
 
 impl BinaryVec {
     pub fn random(len: usize) -> Self {
-        let mut bits = Box::new(Vec::<bool>::new());
+        let mut bits = Vec::<bool>::new();
 
         for _ in 0..len {
             bits.push(random());
@@ -18,7 +18,7 @@ impl BinaryVec {
 
     pub fn ones(len: usize) -> Self {
         Self {
-            bits: Box::new(vec![true; len]),
+            bits: vec![true; len],
         }
     }
 

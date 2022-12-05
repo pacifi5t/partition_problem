@@ -14,7 +14,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let results = benchmark(&costs, 20);
 
     print_results(&costs, &results);
-    clusterize_results(&results, 4)
+    cluster_results(&results, 4)
 }
 
 fn parse_file(filepath: &str) -> Result<Vec<f64>, Box<dyn Error>> {
@@ -48,7 +48,7 @@ fn print_results(costs: &Vec<f64>, results: &Vec<f64>) {
     let mut best = (0, &f64::MAX);
     let mut worst = (0, &f64::MIN);
     for each in results.iter().enumerate() {
-        if each.1 < &best.1 {
+        if each.1 < best.1 {
             best = each
         }
         if each.1 > worst.1 {
@@ -59,12 +59,12 @@ fn print_results(costs: &Vec<f64>, results: &Vec<f64>) {
     println!("\nBest run: {} - {:.4}", best.0, best.1);
     println!("Worst run: {} - {:.4}", worst.0, worst.1);
 
-    let max_fn = target_fn(&BinaryVec::ones(costs.len()), &costs);
+    let max_fn = target_fn(&BinaryVec::ones(costs.len()), costs);
     let base = max_fn - worst.1;
-    println!("Diff: {:.4}%", ((max_fn - best.1) - base) / base * 100.0);
+    println!("Diff: {:.4}%", (((max_fn - best.1) - base) / base) * 100.0);
 }
 
-fn clusterize_results(results: &Vec<f64>, clusters: usize) -> Result<(), Box<dyn Error>> {
+fn cluster_results(results: &Vec<f64>, clusters: usize) -> Result<(), Box<dyn Error>> {
     let data = Array2::from_shape_vec([results.len(), 1], results.clone())?;
 
     println!("\nClusters - Inertia");
@@ -103,7 +103,7 @@ fn build_histogram(
 
     chart_ctx
         .configure_mesh()
-        .light_line_style(&WHITE.mix(0.3))
+        .light_line_style(WHITE.mix(0.3))
         .x_label_formatter(&|s| match s {
             SegmentValue::CenterOf(n) => format!("{:.4}", model.centroids().get([*n, 0]).unwrap()),
             _ => String::new(),
