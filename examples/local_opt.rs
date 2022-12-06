@@ -10,11 +10,11 @@ use std::fs::File;
 use std::io::Read;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let costs = parse_file("data/jewels_1000.txt")?;
+    let costs = parse_file("data/subset_sum_example.csv")?;
     let results = benchmark(&costs, 20);
 
     print_results(&costs, &results);
-    cluster_results(&results, 4)
+    cluster_results(&results, 3)
 }
 
 fn parse_file(filepath: &str) -> Result<Vec<f64>, Box<dyn Error>> {
@@ -56,8 +56,8 @@ fn print_results(costs: &Vec<f64>, results: &Vec<f64>) {
         }
     }
 
-    println!("\nBest run: {} - {:.4}", best.0, best.1);
-    println!("Worst run: {} - {:.4}", worst.0, worst.1);
+    println!("\nBest run: {} - {:.4}", best.0 + 1, best.1);
+    println!("Worst run: {} - {:.4}", worst.0 + 1, worst.1);
 
     let max_fn = target_fn(&BinaryVec::ones(costs.len()), costs);
     let base = max_fn - worst.1;
