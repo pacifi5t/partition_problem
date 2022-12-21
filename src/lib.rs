@@ -1,6 +1,7 @@
 use binary_vec::BinaryVec;
 
 pub mod binary_vec;
+pub mod demon;
 pub mod hill_climb;
 
 pub fn target_fn(bin_vec: &BinaryVec, values: &Vec<f64>) -> f64 {
