@@ -1,29 +1,35 @@
 use crate::binary_vec::BinaryVec;
 use crate::target_fn;
+use rand::prelude::ThreadRng;
 use rand::{thread_rng, Rng};
 
 const ALPHA: f64 = 0.95;
 
 pub fn demon_alg(values: &Vec<f64>) -> BinaryVec {
-    let mut rng = thread_rng();
-    let mut x = BinaryVec::random(values.len());
-    let mut demon_energy = init_demon_energy(&x);
+    let (mut rng, mut demon_energy, mut x) = set_up(values);
+    let (mut accepted, mut rejected, mut quasi_by_rejected) = (0, 0, 0);
 
     loop {
         let flip = x.one_flip();
-        let y = flip[rng.gen_range(0..flip.len())];
-        let delta_f = target_fn(&y, values) - target_fn(&x, values);
+        let y = &flip[rng.gen_range(0..flip.len())];
+        let delta_f = target_fn(y, values) - target_fn(&x, values);
 
         if delta_f < demon_energy {
-            x = y;
+            x = y.clone();
             demon_energy -= delta_f;
+            accepted += 1;
+        } else {
+            rejected += 1;
         }
 
-        if is_quasi_equilibrium() {
+        if let Some(was_rejected) = quasi_equilibrium(accepted, rejected, flip.len()) {
             demon_energy *= ALPHA;
+            if was_rejected {
+                quasi_by_rejected += 1;
+            }
         }
 
-        if is_frozen() {
+        if quasi_by_rejected == 3 {
             break;
         }
     }
@@ -31,14 +37,19 @@ pub fn demon_alg(values: &Vec<f64>) -> BinaryVec {
     x
 }
 
+fn set_up(values: &Vec<f64>) -> (ThreadRng, f64, BinaryVec) {
+    let x = BinaryVec::random(values.len());
+    (thread_rng(), init_demon_energy(&x), x)
+}
+
 fn init_demon_energy(bv: &BinaryVec) -> f64 {
     todo!()
 }
 
-fn is_quasi_equilibrium() -> bool {
-    todo!()
-}
-
-fn is_frozen() -> bool {
-    todo!()
+fn quasi_equilibrium(accepted: usize, rejected: usize, flip_len: usize) -> Option<bool> {
+    let was_rejected = rejected == 2 * flip_len;
+    match accepted == flip_len || was_rejected {
+        true => Some(was_rejected),
+        false => None,
+    }
 }
