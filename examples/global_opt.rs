@@ -1,13 +1,19 @@
+use chrono::Utc;
 use partition_problem::*;
+use plotters::prelude::*;
 use std::error::Error;
 use std::fs::File;
 use std::io::Read;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let costs = parse_file("data/subset_sum_example.csv")?;
-    let results = benchmark(&costs, 10);
+    let costs = parse_file("data/subsetSumExample2.csv")?;
+    let (best, target_fn_data) = demon_alg(&costs);
+    let target_fn_val = target_fn(&best, &costs);
 
-    print_results(&costs, &results);
+    println!("{:.4}", target_fn_val);
+    let now = Utc::now().format("(%y-%m-%d %H:%M:%S)").to_string();
+    let filepath = format!("figures/global_opt {}.svg", now);
+    plot_func("Partition problem", filepath, &target_fn_data)?;
     Ok(())
 }
 
@@ -24,36 +30,25 @@ fn parse_file(filepath: &str) -> Result<Vec<f64>, Box<dyn Error>> {
     Ok(costs)
 }
 
-fn benchmark(costs: &Vec<f64>, runs: usize) -> Vec<f64> {
-    let mut results = Vec::new();
+fn plot_func(caption: &str, filepath: String, data: &Vec<f64>) -> Result<(), Box<dyn Error>> {
+    let root = SVGBackend::new(&filepath, (1440, 900)).into_drawing_area();
+    root.fill(&WHITE)?;
 
-    for i in 1..=runs {
-        let res = demon_alg(costs);
-        let target_fn_val = target_fn(&res, costs);
-        results.push(target_fn_val);
+    let max = data.iter().max_by(|a, b| a.total_cmp(b)).unwrap();
+    let min = data.iter().min_by(|a, b| a.total_cmp(b)).unwrap();
 
-        println!("Run {}: {:.4}", i, target_fn_val);
-    }
+    let mut chart_ctx = ChartBuilder::on(&root)
+        .caption(caption, ("sans-serif", 20).into_font())
+        .margin(5)
+        .set_left_and_bottom_label_area_size(50)
+        .build_cartesian_2d(0..data.len(), *min..*max)?;
 
-    results
-}
+    chart_ctx.configure_mesh().draw()?;
+    chart_ctx.draw_series(LineSeries::new(
+        data.iter().enumerate().map(|e| (e.0, *e.1)),
+        BLUE,
+    ))?;
 
-fn print_results(costs: &Vec<f64>, results: &Vec<f64>) {
-    let mut best = (0, &f64::MAX);
-    let mut worst = (0, &f64::MIN);
-    for each in results.iter().enumerate() {
-        if each.1 < best.1 {
-            best = each
-        }
-        if each.1 > worst.1 {
-            worst = each
-        }
-    }
-
-    println!("\nBest run: {} - {:.4}", best.0 + 1, best.1);
-    println!("Worst run: {} - {:.4}", worst.0 + 1, worst.1);
-
-    let max_fn = target_fn(&BinaryVec::ones(costs.len()), costs);
-    let base = max_fn - worst.1;
-    println!("Diff: {:.4}%", (((max_fn - best.1) - base) / base) * 100.0);
+    root.present()?;
+    Ok(())
 }

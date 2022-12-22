@@ -6,15 +6,18 @@ use rand_xoshiro::Xoshiro256Plus;
 const ALPHA: f64 = 0.95;
 const SEED: u64 = 42;
 
-pub fn demon_alg(values: &Vec<f64>) -> BinaryVec {
+pub fn demon_alg(values: &Vec<f64>) -> (BinaryVec, Vec<f64>) {
     let (mut rng, mut demon_energy, mut x) = set_up(values);
     let (mut accepted, mut rejected, mut quasi_by_rejected) = (0, 0, 0);
+    let mut target_fn_results = Vec::new();
 
     loop {
         let flip = x.one_flip();
         let y = &flip[rng.gen_range(0..flip.len())];
-        let delta_f = target_fn(y, values) - target_fn(&x, values);
+        let target_fn_x = target_fn(&x, values);
+        let delta_f = target_fn(y, values) - target_fn_x;
 
+        target_fn_results.push(target_fn_x);
         if delta_f < demon_energy {
             x = y.clone();
             demon_energy -= delta_f;
@@ -32,12 +35,13 @@ pub fn demon_alg(values: &Vec<f64>) -> BinaryVec {
             }
         }
 
+        // Can be changed
         if quasi_by_rejected == 3 {
             break;
         }
     }
 
-    x
+    (x, target_fn_results)
 }
 
 fn set_up(values: &Vec<f64>) -> (Xoshiro256Plus, f64, BinaryVec) {
@@ -85,6 +89,7 @@ fn demon_try(rng: &mut Xoshiro256Plus, values: &Vec<f64>, bv: &BinaryVec, energy
 }
 
 fn quasi_equilibrium(accepted: usize, rejected: usize, flip_len: usize) -> Option<bool> {
+    // Can be changed
     let was_rejected = rejected == 2 * flip_len;
     match accepted == flip_len || was_rejected {
         true => Some(was_rejected),
