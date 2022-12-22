@@ -35,6 +35,30 @@ impl BinaryVec {
         flips
     }
 
+    pub fn two_flip(&self) -> Vec<BinaryVec> {
+        let mut flips = Vec::new();
+
+        for i in 0..self.bits.len() {
+            for j in 0..self.bits.len() {
+                if i == j {
+                    continue;
+                }
+
+                let mut copy = self.clone();
+
+                let elem1 = copy.bits.get_mut(i).unwrap();
+                *elem1 = !*elem1;
+
+                let elem2 = copy.bits.get_mut(j).unwrap();
+                *elem2 = !*elem2;
+
+                flips.push(copy);
+            }
+        }
+
+        flips
+    }
+
     pub fn as_nums(&self) -> Vec<u8> {
         let mut nums = Vec::new();
         for each in self.bits.iter() {
