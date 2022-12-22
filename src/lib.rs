@@ -1,4 +1,6 @@
-use binary_vec::BinaryVec;
+pub use binary_vec::BinaryVec;
+pub use demon::demon_alg;
+pub use hill_climb::hill_climb_min;
 
 pub mod binary_vec;
 pub mod demon;

@@ -1,8 +1,7 @@
 use chrono::Utc;
 use int_data_analysis::kmeans::{KMeans, Model};
 use ndarray::Array2;
-use partition_problem::binary_vec::BinaryVec;
-use partition_problem::hill_climb::{hill_climb_min, target_fn};
+use partition_problem::*;
 use plotters::prelude::*;
 use std::collections::HashMap;
 use std::error::Error;
