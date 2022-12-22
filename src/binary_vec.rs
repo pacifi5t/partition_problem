@@ -1,6 +1,6 @@
 use rand::random;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct BinaryVec {
     bits: Vec<bool>,
 }
