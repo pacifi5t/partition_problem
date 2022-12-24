@@ -86,7 +86,7 @@ fn cluster_results(results: &Vec<f64>, clusters: usize) -> Result<(), Box<dyn Er
     let best_model = models.get(&(clusters as u32)).unwrap();
     println!("\nBest model\n{:?}", best_model);
 
-    let now = Utc::now().format("(%Y-%m-%d %H:%M:%S)").to_string();
+    let now = Utc::now().format("(%H:%M:%S %d.%m.%Y)").to_string();
     let filepath = format!("figures/local_opt {}.svg", now);
     create_dir("figures").unwrap_or(());
     build_histogram("Partition problem", filepath, best_model, &data)

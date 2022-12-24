@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     println!("{:.4}", target_fn(&best, &values));
 
-    let now = Utc::now().format("(%y-%m-%d %H:%M:%S)").to_string();
+    let now = Utc::now().format("(%H:%M:%S %d.%m.%Y)").to_string();
     let filepath = format!("figures/global_opt {}.svg", now);
     create_dir("figures").unwrap_or(());
     plot_func("Partition problem", filepath, &target_fn_data)?;
