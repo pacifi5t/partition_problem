@@ -1,18 +1,27 @@
 use chrono::Utc;
+use clap::Parser;
 use int_data_analysis::kmeans::{KMeans, Model};
 use ndarray::Array2;
 use partition_problem::*;
 use plotters::prelude::*;
 use std::collections::HashMap;
 use std::error::Error;
-use std::fs::File;
+use std::fs::{create_dir, File};
 use std::io::Read;
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let costs = parse_file("data/subset_sum_example.csv")?;
-    let results = benchmark(&costs, 20);
+#[derive(Parser, Debug)]
+struct Args {
+    /// Path on input file
+    #[arg(value_hint = clap::ValueHint::FilePath)]
+    file: String,
+}
 
-    print_results(&costs, &results);
+fn main() -> Result<(), Box<dyn Error>> {
+    let args = Args::parse();
+    let values = parse_file(&args.file)?;
+    let results = benchmark(&values, 20);
+
+    print_results(&values, &results);
     cluster_results(&results, 3)
 }
 
@@ -29,12 +38,12 @@ fn parse_file(filepath: &str) -> Result<Vec<f64>, Box<dyn Error>> {
     Ok(costs)
 }
 
-fn benchmark(costs: &Vec<f64>, runs: usize) -> Vec<f64> {
+fn benchmark(values: &Vec<f64>, runs: usize) -> Vec<f64> {
     let mut results = Vec::new();
 
     for i in 1..=runs {
-        let res = hill_climb_min(costs);
-        let target_fn_val = target_fn(&res, costs);
+        let res = hill_climb_min(values);
+        let target_fn_val = target_fn(&res, values);
         results.push(target_fn_val);
 
         println!("Run {}: {:.4}", i, target_fn_val);
@@ -43,7 +52,7 @@ fn benchmark(costs: &Vec<f64>, runs: usize) -> Vec<f64> {
     results
 }
 
-fn print_results(costs: &Vec<f64>, results: &Vec<f64>) {
+fn print_results(values: &Vec<f64>, results: &Vec<f64>) {
     let mut best = (0, &f64::MAX);
     let mut worst = (0, &f64::MIN);
     for each in results.iter().enumerate() {
@@ -58,7 +67,7 @@ fn print_results(costs: &Vec<f64>, results: &Vec<f64>) {
     println!("\nBest run: {} - {:.4}", best.0 + 1, best.1);
     println!("Worst run: {} - {:.4}", worst.0 + 1, worst.1);
 
-    let max_fn = target_fn(&BinaryVec::ones(costs.len()), costs);
+    let max_fn = target_fn(&BinaryVec::ones(values.len()), values);
     let base = max_fn - worst.1;
     println!("Diff: {:.4}%", (((max_fn - best.1) - base) / base) * 100.0);
 }
@@ -79,6 +88,7 @@ fn cluster_results(results: &Vec<f64>, clusters: usize) -> Result<(), Box<dyn Er
 
     let now = Utc::now().format("(%Y-%m-%d %H:%M:%S)").to_string();
     let filepath = format!("figures/local_opt {}.svg", now);
+    create_dir("figures").unwrap_or(());
     build_histogram("Partition problem", filepath, best_model, &data)
 }
 

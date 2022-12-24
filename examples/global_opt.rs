@@ -1,19 +1,30 @@
 use chrono::Utc;
+use clap::Parser;
 use partition_problem::*;
 use plotters::prelude::*;
 use std::error::Error;
-use std::fs::File;
+use std::fs::{create_dir, File};
 use std::io::Read;
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let costs = parse_file("data/subsetSumExample2.csv")?;
-    let (best, target_fn_data) = demon_alg(&costs);
-    let target_fn_val = target_fn(&best, &costs);
+#[derive(Parser, Debug)]
+struct Args {
+    /// Path on input file
+    #[arg(value_hint = clap::ValueHint::FilePath)]
+    file: String,
+}
 
-    println!("{:.4}", target_fn_val);
+fn main() -> Result<(), Box<dyn Error>> {
+    let args = Args::parse();
+    let values = parse_file(&args.file)?;
+    let (best, target_fn_data) = demon_alg(&values);
+
+    println!("{:.4}", target_fn(&best, &values));
+
     let now = Utc::now().format("(%y-%m-%d %H:%M:%S)").to_string();
     let filepath = format!("figures/global_opt {}.svg", now);
+    create_dir("figures").unwrap_or(());
     plot_func("Partition problem", filepath, &target_fn_data)?;
+
     Ok(())
 }
 

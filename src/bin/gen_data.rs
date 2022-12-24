@@ -1,12 +1,17 @@
-use std::fs::{create_dir, File};
-use std::io::Write;
+use clap::Parser;
 use rand::Rng;
+use std::fs::File;
+use std::io::Write;
+
+#[derive(Parser, Debug)]
+struct Args {
+    /// Path to output file
+    #[arg(value_hint = clap::ValueHint::FilePath)]
+    file: String,
+}
 
 fn main() -> std::io::Result<()> {
-    let filepath = "data/jewels_0_1.txt";
-
-    std::fs::remove_file(filepath).unwrap_or(());
-    create_dir("data").unwrap_or(());
+    let args = Args::parse();
 
     let mut rng = rand::thread_rng();
     let mut buf = String::new();
@@ -14,7 +19,7 @@ fn main() -> std::io::Result<()> {
         buf += format!("{}\n", rng.gen_range(0.0..1.0)).as_str();
     }
 
-    let mut file = File::create(filepath)?;
+    let mut file = File::create(args.file)?;
     file.write_all(buf.as_bytes())?;
     Ok(())
 }
