@@ -52,7 +52,7 @@ fn benchmark(values: &Vec<f64>, runs: usize) -> Vec<f64> {
     results
 }
 
-fn print_results(values: &Vec<f64>, results: &Vec<f64>) {
+fn print_results(values: &Vec<f64>, results: &[f64]) {
     let mut best = (0, &f64::MAX);
     let mut worst = (0, &f64::MIN);
     for each in results.iter().enumerate() {

@@ -6,7 +6,7 @@ pub mod binary_vec;
 pub mod demon;
 pub mod hill_climb;
 
-pub fn target_fn(bin_vec: &BinaryVec, values: &Vec<f64>) -> f64 {
+pub fn target_fn(bin_vec: &BinaryVec, values: &[f64]) -> f64 {
     let nums = bin_vec.as_nums();
     let sum1 = nums
         .iter()

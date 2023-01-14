@@ -50,7 +50,7 @@ fn set_up(values: &Vec<f64>) -> (Xoshiro256Plus, f64, BinaryVec) {
     (rng, init_demon_energy(values, &x), x)
 }
 
-fn init_demon_energy(values: &Vec<f64>, bv: &BinaryVec) -> f64 {
+fn init_demon_energy(values: &[f64], bv: &BinaryVec) -> f64 {
     let precision = 0.01;
     let mut rng = Xoshiro256Plus::seed_from_u64(SEED);
     let mut energy = f32::MAX as f64;
@@ -70,7 +70,7 @@ fn init_demon_energy(values: &Vec<f64>, bv: &BinaryVec) -> f64 {
     }
 }
 
-fn demon_try(rng: &mut Xoshiro256Plus, values: &Vec<f64>, bv: &BinaryVec, energy: f64) -> f64 {
+fn demon_try(rng: &mut Xoshiro256Plus, values: &[f64], bv: &BinaryVec, energy: f64) -> f64 {
     const ATTEMPTS: usize = 100;
 
     let flip = bv.one_flip();
