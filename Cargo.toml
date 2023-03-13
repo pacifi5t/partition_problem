@@ -8,9 +8,11 @@ rand = "0.8.5"
 rand_xoshiro = "0.6.0"
 ndarray = "0.15.6"
 clap = { version = "4.0.29", features = ["derive"] }
-int_data_analysis = { git = "https://gitlab.com/pacifi5t/int_data_analysis" }
 
 [dev-dependencies]
 chrono = "0.4.23"
 csv = "1.1.6"
 plotters = "0.3.4"
+linfa = "0.6.1"
+linfa-clustering = "0.6.1"
+linfa-nn = "0.6.1"

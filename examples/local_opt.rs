@@ -1,6 +1,9 @@
 use chrono::Utc;
 use clap::Parser;
-use int_data_analysis::kmeans::{KMeans, Model};
+use linfa::prelude::{Fit, Predict};
+use linfa::Dataset;
+use linfa_clustering::KMeans;
+use linfa_nn::distance::L2Dist;
 use ndarray::Array2;
 use partition_problem::*;
 use plotters::prelude::*;
@@ -74,28 +77,29 @@ fn print_results(values: &Vec<f64>, results: &[f64]) {
 
 fn cluster_results(results: &Vec<f64>, clusters: usize) -> Result<(), Box<dyn Error>> {
     let data = Array2::from_shape_vec([results.len(), 1], results.clone())?;
+    let dataset = Dataset::from(data);
 
     println!("\nClusters - Inertia");
-    let mut models: HashMap<u32, Model> = HashMap::new();
+    let mut models = HashMap::new();
     for n_clusters in 1..=5 {
-        let model = KMeans::default().n_clusters(n_clusters).fit(&data);
+        let model = KMeans::params(n_clusters).fit(&dataset).expect("");
         println!("{n_clusters} - {:.4}", model.inertia());
         models.insert(n_clusters, model);
     }
 
-    let best_model = models.get(&(clusters as u32)).unwrap();
-    println!("\nBest model\n{:?}", best_model);
+    let best_model = models.get(&clusters).unwrap();
+    println!("\nBest model\n{:?}", best_model.centroids());
 
     let now = Utc::now().format("(%H:%M:%S %d.%m.%Y)").to_string();
     let filepath = format!("figures/local_opt {}.svg", now);
     create_dir("figures").unwrap_or(());
-    build_histogram("Partition problem", filepath, best_model, &data)
+    build_histogram("Partition problem", filepath, best_model, &dataset.records)
 }
 
 fn build_histogram(
     caption: &str,
     filepath: String,
-    model: &Model,
+    model: &KMeans<f64, L2Dist>,
     data: &Array2<f64>,
 ) -> Result<(), Box<dyn Error>> {
     let root = SVGBackend::new(&filepath, (400, 400)).into_drawing_area();
@@ -123,7 +127,7 @@ fn build_histogram(
         Histogram::vertical(&chart_ctx)
             .style(BLUE.filled())
             .margin(10)
-            .data(data.rows().into_iter().map(|r| (model.predict(r), 1))),
+            .data(data.rows().into_iter().map(|r| (model.predict(&r), 1))),
     )?;
 
     root.present()?;
